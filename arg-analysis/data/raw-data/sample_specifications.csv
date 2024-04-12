@@ -1,0 +1,27 @@
+﻿"Sample
+number",Sample Number,Month,Age,DNA quality,DNA concentration,Volume,CollectionDate,"Country
+"
+1A,B4,22-09,Fresh,1.91,10,100,13/09/2022,Great Britain
+2A,B10,22-09,Dried,1.9,10,100,12/10/2022,Great Britain
+3A,B16,22-10,Fresh,1.9,10,100,12/10/2022,Great Britain
+4A,B22,22-10,Dried,1.9,10,100,11/11/2022,Great Britain
+5A,B28,22-11,Fresh,1.91,10,100,11/11/2022,Great Britain
+6A,B34,22-11,Dried,1.9,10,100,13/12/2022,Great Britain
+7A,B40,22-12,Fresh,1.91,10,100,13/12/2022,Great Britain
+8A,B46,22-12,Dried,1.86,10,100,10/01/2023,Great Britain
+9A,B52,23-01,Fresh,1.87,10,100,10/01/2023,Great Britain
+10A,B58,23-01,Dried,1.91,10,100,10/02/2023,Great Britain
+11A,B64,23-02,Fresh,1.86,10,100,10/02/2023,Great Britain
+12A,B70,23-02,Dried,1.86,10,100,14/03/2023,Great Britain
+13A,B76,23-03,Fresh,1.83,10,100,14/03/2023,Great Britain
+14A,B82,23-03,Dried,1.87,10,100,11/04/2023,Great Britain
+15A,B88,23-04,Fresh,1.89,10,100,11/04/2023,Great Britain
+16A,B94,23-04,Dried,1.87,10,100,17/05/2023,Great Britain
+17A,B100,23-05,Fresh,1.89,10,100,17/05/2023,Great Britain
+18A,B106,23-05,Dried,1.88,10,100,13/06/2023,Great Britain
+19A,B112,23-06,Fresh,1.88,10,100,13/06/2023,Great Britain
+20A,B118,23-06,Dried,1.87,10,100,11/07/2023,Great Britain
+21A,B124,23-07,Fresh,1.89,10,100,11/07/2023,Great Britain
+22A,B130,23-07,Dried,1.89,10,100,15/08/2023,Great Britain
+23A,B136,23-08,Fresh,1.9,10,100,15/08/2023,Great Britain
+24A,B142,23-08,Dried,1.88,10,100,12/09/2023,Great Britain
