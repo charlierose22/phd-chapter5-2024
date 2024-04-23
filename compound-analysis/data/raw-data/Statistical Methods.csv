@@ -1,0 +1,4 @@
+"Statistical Methods ID"	"Checked"	"Node Name"	"Processing Step"	"Method Description"
+"1"	"False"	"Align Retention Times (ChromAlign)"	"Retention Time Alignment"	"Retention time alignment performed by the ChromAlign algorithm: Sadygov et al. (https://doi.org/10.1021/ac060923y)"
+"2"	"False"	"Group Compounds"	"[Compounds] Apply Peak Rating Filter"	"Only compounds with an Original Peak Rating greater or equal to 5 in at least 2 samples are kept for further processing."
+"3"	"False"	"Differential Analysis"	"[Compounds] Input Data"	"Peak Area"
