@@ -2,7 +2,7 @@
 library(tidyverse)
 
 # Define the folder path (replace with your actual path)
-folder_path <- "prescription-analysis/data/"
+folder_path <- "prescription-analysis/unfiltered_data/"
 
 # List all CSV files in the folder
 all_files <- list.files(path = folder_path, pattern = "*.csv", full.names = TRUE)
@@ -21,3 +21,15 @@ for (file in all_files) {
   write.csv(data, file = paste0(folder_path, "filtered_", year_month, ".csv"),
     row.names = FALSE)
 }
+
+
+data <- read_csv("prescription-analysis/unfiltered_data/EPD_202307.csv") %>% janitor::clean_names()
+# Extract year and month from filename
+filename <- basename(data)
+year_month <- str_sub(filename, start = 7, end = 10)
+#subset larger csv
+data <- subset(data, bnf_chapter_plus_code == '05: Infections')
+data <- subset(data, icb_name == 'NHS HUMBER AND NORTH YORKSHIRE INTEGRATE')
+# create smaller filtered csv
+write.csv(data, file = paste0(folder_path, "filtered_", year_month, ".csv"),
+          row.names = FALSE)
