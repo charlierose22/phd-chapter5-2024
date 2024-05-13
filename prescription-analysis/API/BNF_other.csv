@@ -1,21 +1,16 @@
 code,name
-0501070F0,
-0501070I0,
-0501070H0,
-0501070AF,
-0501070Y0,
+0501070I0,colistimethate
+0501070H0,colistin
+0501070Y0,daptomycin
 0501070AC,fidaxomicin
 0501070AE,fosfomycin
 0501070M0,fusidic acid
 0501070W0,linezolid
-0501070AB,
-0501070Z0,
-0501070X0,
-0501070N0,
-0501070AA,
-0501070AD,
-0501070T0,
-0501070U0,
+0501070AB,nitazoxanide
+0501070Z0,pristinamycin
+0501070X0,rifaximin
+0501070N0,sodium fusidate
+0501070AA,taurolidine
 0501130S0,fosfomycin
 0501130D0,fosfomycin
 0501130H0,methanamine
