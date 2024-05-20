@@ -2,9 +2,8 @@
 library(tidyverse)
 library(fuzzyjoin)
 library(stringi)
-library(hrbrthemes)
-library(viridis)
 library(ggforce)
+library(RColorBrewer)
 
 # IMPORT YOUR CD DATA
 seasonal_study <- readr::read_delim(
@@ -168,30 +167,34 @@ psychoactive <- splitmasslist$"kps_psychoactive_substances_v2"
 pharmaceuticals <- splitmasslist$"kps_pharmaceuticals"
 
 # wide view for samples and fully annotated view
-antibiotics_means <- antibiotics %>%
-  group_by(pick(name, day, month)) %>%
-  summarise(
-    mean = mean(group_area),
-    std = sd(group_area),
-    n = length(group_area),
-    se = std / sqrt(n)
-  )
+#antibiotics_means <- antibiotics %>%
+#  group_by(pick(name, day, month)) %>%
+#  summarise(
+#    mean = mean(group_area),
+#    std = sd(group_area),
+#    n = length(group_area),
+#    se = std / sqrt(n)
+#  )
 
 # clean compound names in antibiotics dataset.
-antibiotics_means$name <- antibiotics_means$name %>%
+antibiotics$name <- antibiotics$name %>%
   fedmatch::clean_strings()
 
 # add antibiotic classes for common antibiotics
 class_info <-
   read.csv("compound-analysis/data/antimicrobial_classes.csv")
-location_classes <- antibiotics_means %>%
+classes <- antibiotics %>%
   fuzzy_left_join(class_info,
                   by = c("name" = "name"),
                   match_fun = str_detect)
 
 # replace NA with 'unknown'
-location_classes$class <- location_classes$class %>%
+classes$class <- classes$class %>%
   replace_na('unknown')
+
+# Remove duplicated rows based on name.x, month, mean
+duplicates <- classes %>% 
+  distinct(name.x, month, group_area, .keep_all = TRUE)
 
 # PRODUCE A CSV OF RESULTS
 write.csv(
@@ -200,7 +203,7 @@ write.csv(
   row.names = FALSE
 )
 write.csv(
-  location_classes,
+  duplicates,
   "compound-analysis/data/processed-data/antibiotics_class_organised.csv",
   row.names = FALSE
 )
@@ -219,9 +222,139 @@ write.csv(
   "compound-analysis/data/processed-data/pharmaceuticals.csv",
   row.names = FALSE
 )
-write.csv(
-  antibiotics_wide,
-  "compound-analysis/data/processed-data/antibiotics_wide.csv"
-)
+
+
+# wide view for samples and fully annotated view
+classes_means <- duplicates %>%
+  group_by(pick(class, day, month)) %>%
+  summarise(
+    mean = mean(group_area),
+    std = sd(group_area),
+    n = length(group_area),
+    se = std / sqrt(n)
+  )
 
 # PLOT THE RESULTS
+
+# split based on target antibiotics for location 
+split <- split(classes_means, classes_means$class)
+aminoglycoside <- split$aminoglycoside
+beta <- split$'beta-lactam'
+glycopeptide_metronidazole <- split$glycopeptide_metronidazole
+macrolide_lincosamide <- split$macrolide_lincosamide
+other <- split$other
+phenicol <- split$phenicol
+quinolone <- split$quinolone
+sulfonamide_trimethoprim <- split$sulfonamide_trimethoprim
+tetracycline <- split$tetracycline
+
+# INDIVIDUAL --------------------------------------------------------------
+
+aminoglycoside %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+beta %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+macrolide_lincosamide %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+other %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+phenicol %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample_day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+quinolone %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample_day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+sulfonamide_trimethoprim %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample_day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+tetracycline %>%
+  ggplot(aes(x = month, y = mean, fill = day)) +
+  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .2,
+                position = position_dodge(width = 0.6)) +
+  labs(x = "month", y = "peak intensity", fill = "sample_day") +
+  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+

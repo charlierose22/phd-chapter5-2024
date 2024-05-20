@@ -18,7 +18,8 @@ assayinformation <- readr::read_csv("arg-analysis/data/raw-data/arg_selections.c
   janitor::clean_names()
 
 # import sample information
-samples <- readr::read_csv("arg-analysis/data/raw-data/sample_specifications.csv") %>%
+samples <- readr::read_csv("arg-analysis/data/raw-data/sample_specifications.csv", 
+                           col_types = cols(Day = col_character())) %>%
   janitor::clean_names()
 
 
@@ -295,7 +296,7 @@ write.csv(assay_samples, "arg-analysis/data/processed-data/annotated_delta_ct_me
 
 # calculate means
 means <- assay_samples %>%
-  group_by(pick(gene, month, age, collection_date, target_antibiotics_major)) %>%
+  group_by(pick(gene, class, month, day)) %>%
   summarise(
     mean = mean(delta_ct),
     std = sd(delta_ct),
@@ -307,9 +308,9 @@ means <- assay_samples %>%
 assay_samples %>% 
   group_by(month) %>%
   ggplot() +
-  geom_violin(aes(x = collection_date, y = delta_ct, 
-                  fill = target_antibiotics_major, 
-                  color = target_antibiotics_major)) +
+  geom_violin(aes(x = month, y = delta_ct, 
+                  fill = class, 
+                  color = class)) +
   scale_y_log10() +
   labs(x = "date",
        y = "relative abundance",
