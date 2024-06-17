@@ -1,11 +1,13 @@
 # load libraries and packages
 library(tidyverse)
 library(RColorBrewer)
+library(ggsci)
 library(ggstatsplot)
 library(ggrepel)
 library(ggtext)
 
 # Upload all data from csvs,
+BNF_classes <- read_csv("prescription-analysis/API/API_BNF.csv")
 
 # Define the folder path
 folder_path <- "prescription-analysis/data"
@@ -107,28 +109,19 @@ quinolone <- split$quinolone
 sulfonamide_trimethoprim <- split$sulfonamide_trimethoprim
 tetracycline <- split$tetracycline
 
-means_months <- antibiotics %>%
+abx <- antibiotics %>%
   group_by(pick(abx_name, year_month, abx_class)) %>%
-  summarise(
-    mean = mean(total_quantity),
-    std = sd(total_quantity),
-    n = length(total_quantity),
-    se = std / sqrt(n)
-  )
+  summarise(sum = sum(total_quantity))
 
-means_total <- antibiotics %>% 
+total <- antibiotics %>% 
   group_by(year_month, abx_class) %>% 
   summarise(
-    mean = mean(total_quantity),
-    std = sd(total_quantity),
-    n = length(total_quantity),
-    se = std / sqrt(n)
-  )
+    sum = sum(total_quantity))
 
 darkpalette <- c("firebrick4",
                  "orangered1",
                  "darkgoldenrod2",
-                 "yellow3",
+                 "yellow",
                  "darkolivegreen4", 
                  "green3",
                  "turquoise3", 
@@ -138,18 +131,34 @@ darkpalette <- c("firebrick4",
                  "violetred2",
                  "maroon")
 
-
+labels <- c("aminoglycoside",
+            "beta-lactam",
+            "glycopeptide and\nmetronidazole",
+            "macrolide lincosamide",
+            "multi-drug resistance",
+            "mobile genetic elements\nand integrons",
+            "other",
+            "phenicol",
+            "quinolone",
+            "sulfonamide and\ntrimethoprim",
+            "tetracycline")
 
 # plot
 means_total %>%
-  ggplot(aes(x = year_month, y = mean, colour = abx_class)) +
+  ggplot(aes(x = year_month, y = sum, colour = abx_class)) +
   geom_point(shape = 15) +
-  geom_errorbar(aes(x = year_month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .6) +
   geom_line() +
-  labs(x = "month", y = "total quantity prescribed") +
-  scale_color_manual(values = darkpalette) +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Class") +
+  scale_color_d3(palette = "category10", labels = c("Aminoglycoside",
+                                                    "Beta-lactam",
+                                                    "Glycopeptide and\nMetronidazole",
+                                                    "Macrolide and\nLincosamide",
+                                                    "Other",
+                                                    "Phenicol",
+                                                    "Quinolone",
+                                                    "Sulfonamide and\nTrimethoprim",
+                                                    "Tetracycline")) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b") +
-  theme_minimal(base_size = 12)
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
