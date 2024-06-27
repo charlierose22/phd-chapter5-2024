@@ -92,28 +92,28 @@ york_bind <- bind_rows(YO_2208,
 
 # add class information so we can filter out anti-fungals and anti-virals etc
 classes_info <- york_bind %>% left_join(BNF_classes, by = "bnf_chemical_substance")
-antibiotics <- classes_info %>% drop_na(abx_class)
+antibiotics_prescriptions <- classes_info %>% drop_na(abx_class)
 
 # set date
-antibiotics$year_month <- ym(antibiotics$year_month)
+antibiotics_prescriptions$year_month <- ym(antibiotics_prescriptions$year_month)
 
 # split based on target antibiotics for location 
-split <- split(antibiotics, antibiotics$abx_class)
-aminoglycoside <- split$aminoglycoside
-beta <- split$'beta-lactam'
-glycopeptide_metronidazole <- split$glycopeptide_metronidazole
-macrolide_lincosamide <- split$macrolide_lincosamide
-other <- split$other
-phenicol <- split$phenicol
-quinolone <- split$quinolone
-sulfonamide_trimethoprim <- split$sulfonamide_trimethoprim
-tetracycline <- split$tetracycline
+split_prescriptions <- split(antibiotics_prescriptions, antibiotics_prescriptions$abx_class)
+aminoglycoside_prescriptions <- split_prescriptions$aminoglycoside
+beta_prescriptions <- split_prescriptions$'beta-lactam'
+glycopeptide_metronidazole_prescriptions <- split_prescriptions$glycopeptide_metronidazole
+macrolide_lincosamide_prescriptions <- split_prescriptions$macrolide_lincosamide
+other_prescriptions <- split_prescriptions$other
+phenicol_prescriptions <- split_prescriptions$phenicol
+quinolone_prescriptions <- split_prescriptions$quinolone
+sulfonamide_trimethoprim_prescriptions <- split_prescriptions$sulfonamide_trimethoprim
+tetracycline_prescriptions <- split_prescriptions$tetracycline
 
-abx <- antibiotics %>%
+abx <- antibiotics_prescriptions %>%
   group_by(pick(abx_name, year_month, abx_class)) %>%
   summarise(sum = sum(total_quantity))
 
-total <- antibiotics %>% 
+total_prescriptions <- antibiotics_prescriptions %>% 
   group_by(year_month, abx_class) %>% 
   summarise(
     sum = sum(total_quantity))
@@ -144,7 +144,7 @@ labels <- c("aminoglycoside",
             "tetracycline")
 
 # plot
-means_total %>%
+total_prescriptions %>%
   ggplot(aes(x = year_month, y = sum, colour = abx_class)) +
   geom_point(shape = 15) +
   geom_line() +
