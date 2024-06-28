@@ -294,9 +294,21 @@ write.csv(assay_samples, "arg-analysis/data/processed-data/annotated_delta_ct_me
 
 # STATISTICS --------------------------------------------------------------
 
+day1_genes <- assay_samples[!grepl('29', assay_samples$day),]
+
 # calculate means
 means <- assay_samples %>%
   group_by(pick(gene, class, month, day)) %>%
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+
+# calculate means by class
+means_class_genes <- day1_genes %>%
+  group_by(pick(class, month, day)) %>%
   summarise(
     mean = mean(delta_ct),
     std = sd(delta_ct),

@@ -160,11 +160,11 @@ unique(filteredmasslist$mass_list_name)
 # THEN SPLIT BY MASS LIST
 splitmasslist <-
   split(filteredmasslist, filteredmasslist$mass_list_name)
-antibiotics <-
+antibiotics_compounds <-
   splitmasslist$"antibiotics_itn_msca_answer_160616_w_dtxsi_ds"
-metabolites <- splitmasslist$"itnantibiotic_cyp_metabolites"
-psychoactive <- splitmasslist$"kps_psychoactive_substances_v2"
-pharmaceuticals <- splitmasslist$"kps_pharmaceuticals"
+metabolites_compounds <- splitmasslist$"itnantibiotic_cyp_metabolites"
+psychoactive_compounds <- splitmasslist$"kps_psychoactive_substances_v2"
+pharmaceuticals_compounds <- splitmasslist$"kps_pharmaceuticals"
 
 # wide view for samples and fully annotated view
 #antibiotics_means <- antibiotics %>%
@@ -177,55 +177,58 @@ pharmaceuticals <- splitmasslist$"kps_pharmaceuticals"
 #  )
 
 # clean compound names in antibiotics dataset.
-antibiotics$name <- antibiotics$name %>%
+antibiotics_compounds$name <- antibiotics_compounds$name %>%
   fedmatch::clean_strings()
 
 # add antibiotic classes for common antibiotics
 class_info <-
   read.csv("compound-analysis/data/antimicrobial_classes.csv")
-classes <- antibiotics %>%
+classes_compounds <- antibiotics_compounds %>%
   fuzzy_left_join(class_info,
                   by = c("name" = "name"),
                   match_fun = str_detect)
 
 # replace NA with 'unknown'
-classes$class <- classes$class %>%
+classes_compounds$class <- classes_compounds$class %>%
   replace_na('unknown')
 
 # Remove duplicated rows based on name.x, month, mean
-duplicates <- classes %>% 
+duplicates_compounds <- classes_compounds %>% 
   distinct(name.x, month, group_area, .keep_all = TRUE)
+
+duplicates_compounds$month <- ym(duplicates_compounds$month)
 
 # PRODUCE A CSV OF RESULTS
 write.csv(
-  antibiotics,
+  antibiotics_compounds,
   "compound-analysis/data/processed-data/itn_antibiotics.csv",
   row.names = FALSE
 )
 write.csv(
-  duplicates,
+  duplicates_compounds,
   "compound-analysis/data/processed-data/antibiotics_class_organised.csv",
   row.names = FALSE
 )
 write.csv(
-  metabolites,
+  metabolites_compounds,
   "compound-analysis/data/processed-data/itn_metabolites.csv",
   row.names = FALSE
 )
 write.csv(
-  psychoactive,
+  psychoactive_compounds,
   "compound-analysis/data/processed-data/psychoactive.csv",
   row.names = FALSE
 )
 write.csv(
-  pharmaceuticals,
+  pharmaceuticals_compounds,
   "compound-analysis/data/processed-data/pharmaceuticals.csv",
   row.names = FALSE
 )
 
-
+day1_compounds <- duplicates_compounds[!grepl('29',
+                                          duplicates_compounds$day),]
 # wide view for samples and fully annotated view
-classes_means <- duplicates %>%
+classes_means_compounds <- day1_compounds %>%
   group_by(pick(class, day, month)) %>%
   summarise(
     mean = mean(group_area),
@@ -237,20 +240,39 @@ classes_means <- duplicates %>%
 # PLOT THE RESULTS
 
 # split based on target antibiotics for location 
-split <- split(classes_means, classes_means$class)
-aminoglycoside <- split$aminoglycoside
-beta <- split$'beta-lactam'
-glycopeptide_metronidazole <- split$glycopeptide_metronidazole
-macrolide_lincosamide <- split$macrolide_lincosamide
-other <- split$other
-phenicol <- split$phenicol
-quinolone <- split$quinolone
-sulfonamide_trimethoprim <- split$sulfonamide_trimethoprim
-tetracycline <- split$tetracycline
+split_compounds <- split(classes_means_compounds, 
+                                   classes_means_compounds$class)
+aminoglycoside_compounds <- split_compounds$aminoglycoside
+beta_compounds <- split_compounds$'beta-lactam'
+glycopeptide_metronidazole_compounds <- split_compounds$glycopeptide_metronidazole
+macrolide_lincosamide_compounds <- split_compounds$macrolide_lincosamide
+other_compounds <- split_compounds$other
+phenicol_compounds <- split_compounds$phenicol
+quinolone_compounds <- split_compounds$quinolone
+sulfonamide_trimethoprim_compounds <- split_compounds$sulfonamide_trimethoprim
+tetracycline_compounds <- split_compounds$tetracycline
 
 # INDIVIDUAL --------------------------------------------------------------
+classes_means_compounds %>%
+  ggplot(aes(x = month, y = mean, colour = class)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Antibiotic Class") +
+  scale_color_d3(palette = "category10", labels = c("Aminoglycoside",
+                                                    "Beta-lactam",
+                                                    "Glycopeptide and\nMetronidazole",
+                                                    "Macrolide and\nLincosamide",
+                                                    "Other",
+                                                    "Phenicol",
+                                                    "Quinolone",
+                                                    "Sulfonamide and\nTrimethoprim",
+                                                    "Tetracycline")) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
 
-aminoglycoside %>%
+
+aminoglycoside_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -263,7 +285,7 @@ aminoglycoside %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-beta %>%
+beta_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -276,7 +298,7 @@ beta %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-macrolide_lincosamide %>%
+macrolide_lincosamide_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -289,7 +311,7 @@ macrolide_lincosamide %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-other %>%
+other_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -302,7 +324,7 @@ other %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-phenicol %>%
+phenicol_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -316,7 +338,7 @@ phenicol %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-quinolone %>%
+quinolone_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -330,7 +352,7 @@ quinolone %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-sulfonamide_trimethoprim %>%
+sulfonamide_trimethoprim_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
@@ -344,7 +366,7 @@ sulfonamide_trimethoprim %>%
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-tetracycline %>%
+tetracycline_compounds %>%
   ggplot(aes(x = month, y = mean, fill = day)) +
   geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
   geom_errorbar(aes(x = month,
