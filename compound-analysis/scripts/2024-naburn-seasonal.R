@@ -4,6 +4,7 @@ library(fuzzyjoin)
 library(stringi)
 library(ggforce)
 library(RColorBrewer)
+library(ggsci)
 
 # IMPORT YOUR CD DATA
 seasonal_study <- readr::read_delim(
@@ -227,9 +228,21 @@ write.csv(
 
 day1_compounds <- duplicates_compounds[!grepl('29',
                                           duplicates_compounds$day),]
+day1_compounds <- day1_compounds[!grepl('unknown',
+                                              day1_compounds$class),]
+
 # wide view for samples and fully annotated view
 classes_means_compounds <- day1_compounds %>%
-  group_by(pick(class, day, month)) %>%
+  group_by(pick(class, month)) %>%
+  summarise(
+    mean = mean(group_area),
+    std = sd(group_area),
+    n = length(group_area),
+    se = std / sqrt(n)
+  )
+
+means_compounds <- day1_compounds %>%
+  group_by(pick(name.x, class, month)) %>%
   summarise(
     mean = mean(group_area),
     std = sd(group_area),
@@ -240,8 +253,8 @@ classes_means_compounds <- day1_compounds %>%
 # PLOT THE RESULTS
 
 # split based on target antibiotics for location 
-split_compounds <- split(classes_means_compounds, 
-                                   classes_means_compounds$class)
+split_compounds <- split(means_compounds, 
+                         means_compounds$class)
 aminoglycoside_compounds <- split_compounds$aminoglycoside
 beta_compounds <- split_compounds$'beta-lactam'
 glycopeptide_metronidazole_compounds <- split_compounds$glycopeptide_metronidazole
@@ -271,112 +284,75 @@ classes_means_compounds %>%
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
-
 aminoglycoside_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 beta_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 macrolide_lincosamide_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 other_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 phenicol_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 quinolone_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 sulfonamide_trimethoprim_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
 tetracycline_compounds %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "peak intensity", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~name.x, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = name.x)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
