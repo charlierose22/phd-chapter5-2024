@@ -1,6 +1,7 @@
 # load libraries and packages
 library(tidyverse)
 library(RColorBrewer)
+library(grafify)
 library(ggsci)
 library(ggstatsplot)
 library(ggrepel)
@@ -97,8 +98,14 @@ antibiotics_prescriptions <- classes_info %>% drop_na(abx_class)
 # set date
 antibiotics_prescriptions$year_month <- ym(antibiotics_prescriptions$year_month)
 
+abx <- antibiotics_prescriptions %>%
+  group_by(pick(abx_name, year_month, abx_class)) %>%
+  summarise(sum = sum(total_quantity))
+
+abx$abx_name <- str_to_title(abx$abx_name)
+
 # split based on target antibiotics for location 
-split_prescriptions <- split(antibiotics_prescriptions, antibiotics_prescriptions$abx_class)
+split_prescriptions <- split(abx, abx$abx_class)
 aminoglycoside_prescriptions <- split_prescriptions$aminoglycoside
 beta_prescriptions <- split_prescriptions$'beta-lactam'
 glycopeptide_metronidazole_prescriptions <- split_prescriptions$glycopeptide_metronidazole
@@ -108,10 +115,6 @@ phenicol_prescriptions <- split_prescriptions$phenicol
 quinolone_prescriptions <- split_prescriptions$quinolone
 sulfonamide_trimethoprim_prescriptions <- split_prescriptions$sulfonamide_trimethoprim
 tetracycline_prescriptions <- split_prescriptions$tetracycline
-
-abx <- antibiotics_prescriptions %>%
-  group_by(pick(abx_name, year_month, abx_class)) %>%
-  summarise(sum = sum(total_quantity))
 
 total_prescriptions <- antibiotics_prescriptions %>% 
   group_by(year_month, abx_class) %>% 
@@ -131,18 +134,6 @@ darkpalette <- c("firebrick4",
                  "violetred2",
                  "maroon")
 
-labels <- c("aminoglycoside",
-            "beta-lactam",
-            "glycopeptide and\nmetronidazole",
-            "macrolide lincosamide",
-            "multi-drug resistance",
-            "mobile genetic elements\nand integrons",
-            "other",
-            "phenicol",
-            "quinolone",
-            "sulfonamide and\ntrimethoprim",
-            "tetracycline")
-
 # plot
 total_prescriptions %>%
   ggplot(aes(x = year_month, y = sum, colour = abx_class)) +
@@ -158,7 +149,105 @@ total_prescriptions %>%
                                                     "Quinolone",
                                                     "Sulfonamide and\nTrimethoprim",
                                                     "Tetracycline")) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
+# Aminoglycosides
+aminoglycoside_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Beta-lactams
+beta_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Glycopeptide and Metronidazole
+glycopeptide_metronidazole_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Macrolide and Lincosamide
+macrolide_lincosamide_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Other
+other_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Phenicol
+phenicol_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Quinolone
+quinolone_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Sulfonamide and Trimethoprim
+sulfonamide_trimethoprim_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+
+# Tetracycline
+tetracycline_prescriptions %>%
+  ggplot(aes(x = year_month, y = sum, colour = abx_name)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")

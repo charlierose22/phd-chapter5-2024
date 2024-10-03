@@ -295,10 +295,11 @@ write.csv(assay_samples, "arg-analysis/data/processed-data/annotated_delta_ct_me
 # STATISTICS --------------------------------------------------------------
 
 day1_genes <- assay_samples[!grepl('29', assay_samples$day),]
+day29_genes <- assay_samples[!grepl('1', assay_samples$day),]
 
 # calculate means
-means <- assay_samples %>%
-  group_by(pick(gene, class, month, day)) %>%
+means <- day29_genes %>%
+  group_by(pick(gene, class, month)) %>%
   summarise(
     mean = mean(delta_ct),
     std = sd(delta_ct),
@@ -307,8 +308,8 @@ means <- assay_samples %>%
   )
 
 # calculate means by class
-means_class_genes <- day1_genes %>%
-  group_by(pick(class, month, day)) %>%
+means_class_genes <- day29_genes %>%
+  group_by(pick(class, month)) %>%
   summarise(
     mean = mean(delta_ct),
     std = sd(delta_ct),
@@ -329,3 +330,51 @@ assay_samples %>%
        fill = "antibiotic class") +
   guides(color = "none") +
   theme_minimal()
+
+# STATISTICS -------------------------------------------------------------
+day29_genes <- assay_samples[!grepl('1', assay_samples$day),]
+
+# stats test for time
+# basic stats
+
+means_day29 <- day29_genes %>%
+  group_by(pick(gene, month, class)) %>%
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+
+mean_day29_total <- day29_genes %>% 
+  group_by(month, class) %>% 
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+
+# by mechanism
+mechanism_day29 <- day29_genes %>%
+  group_by(pick(gene, month, mechanism)) %>%
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+
+mechanism_day29_total <- day29_genes %>% 
+  group_by(month, mechanism) %>% 
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+
+# count number of genes per class
+count_day29 <- day29_genes %>%
+  group_by(class, month) %>% 
+  summarise(count = n_distinct(gene))

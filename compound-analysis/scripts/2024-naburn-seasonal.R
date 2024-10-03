@@ -226,13 +226,13 @@ write.csv(
   row.names = FALSE
 )
 
-day1_compounds <- duplicates_compounds[!grepl('29',
+day29_compounds <- duplicates_compounds[!grepl('1',
                                           duplicates_compounds$day),]
-day1_compounds <- day1_compounds[!grepl('unknown',
+day29_compounds <- day1_compounds[!grepl('unknown',
                                               day1_compounds$class),]
 
 # wide view for samples and fully annotated view
-classes_means_compounds <- day1_compounds %>%
+classes_means_compounds <- day29_compounds %>%
   group_by(pick(class, month)) %>%
   summarise(
     mean = mean(group_area),
@@ -241,7 +241,7 @@ classes_means_compounds <- day1_compounds %>%
     se = std / sqrt(n)
   )
 
-means_compounds <- day1_compounds %>%
+means_compounds <- day29_compounds %>%
   group_by(pick(name.x, class, month)) %>%
   summarise(
     mean = mean(group_area),
@@ -249,6 +249,8 @@ means_compounds <- day1_compounds %>%
     n = length(group_area),
     se = std / sqrt(n)
   )
+
+means_compounds$name.x <- str_to_title(means_compounds$name.x)
 
 # PLOT THE RESULTS
 
@@ -270,7 +272,7 @@ classes_means_compounds %>%
   ggplot(aes(x = month, y = mean, colour = class)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Antibiotic Class") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Class") +
   scale_color_d3(palette = "category10", labels = c("Aminoglycoside",
                                                     "Beta-lactam",
                                                     "Glycopeptide and\nMetronidazole",
@@ -280,7 +282,7 @@ classes_means_compounds %>%
                                                     "Quinolone",
                                                     "Sulfonamide and\nTrimethoprim",
                                                     "Tetracycline")) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -288,8 +290,9 @@ aminoglycoside_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -297,8 +300,9 @@ beta_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -306,8 +310,9 @@ macrolide_lincosamide_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -315,8 +320,9 @@ other_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -324,8 +330,9 @@ phenicol_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -333,8 +340,9 @@ quinolone_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -342,8 +350,9 @@ sulfonamide_trimethoprim_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
@@ -351,8 +360,9 @@ tetracycline_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (LC)", colour = "Compound Name") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 

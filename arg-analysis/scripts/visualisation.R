@@ -1,12 +1,14 @@
-
 # GRAPH ----------------------------------------------------------------
 library(RColorBrewer)
+library(ggsci)
+library(grafify)
 
 
 means$month <- ym(means$month)
 means_class_genes$month <- ym(means_class_genes$month)
 # Create a list of target antibiotics.
 class <- unique(means$class)
+
 
 
 # split based on target antibiotics for location 
@@ -23,178 +25,153 @@ tetracycline_seasonal <- split_seasonal$tetracycline
 mdr_seasonal <- split_seasonal$mdr
 mge_integrons_seasonal <- split_seasonal$mge_integrons
 
+# total
+# stacked area plot
+stacked_seasonal <- day29_genes %>% 
+  group_by(month, class) %>%
+  summarise(n = sum(delta_ct)) %>%
+  mutate(percentage = n / sum(n))
+
+# time
+ggplot(stacked_seasonal, aes(x = month,
+                            y = percentage,
+                            fill = class)) + 
+  geom_area(alpha = 0.6 , size = 0.5, colour = "black") +
+  scale_fill_manual(values = brewer.pal("Spectral", n = 11)) +
+  labs(x = "Month", y = "Proportion of gene abundance", fill = "Target antibiotic class") +
+  theme_bw(base_size = 12)
+
 
 # INDIVIDUAL --------------------------------------------------------------
+# total gene
 means_class_genes %>%
   ggplot(aes(x = month, y = mean, colour = class)) +
   geom_point(shape = 15) +
   geom_line() +
   labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Antibiotic Class") +
-  scale_color_d3(palette = "category10", labels = c("Aminoglycoside",
-                                                    "Beta-lactam",
-                                                    "Glycopeptide and\nMetronidazole",
-                                                    "Macrolide and\nLincosamide",
-                                                    "Other",
-                                                    "Phenicol",
-                                                    "Quinolone",
-                                                    "Sulfonamide and\nTrimethoprim",
-                                                    "Tetracycline")) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 
-
+# Aminoglycosides
 aminoglycoside_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Beta-lactam
 beta_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Glycopeptide and Metronidazole
 glycopeptide_metronidazole_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Macrolide and Lincosamide
 macrolide_lincosamide_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Other
 other_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Phenicol
 phenicol_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Quinolone
 quinolone_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Sulfonamide and Trimethoprim
 sulfonamide_trimethoprim_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# Tetracycline
 tetracycline_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# MDR
 mdr_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
+# MGE and Integrons
 mge_integrons_seasonal %>%
-  ggplot(aes(x = month, y = mean, fill = day)) +
-  geom_col(width = 0.6, position = position_dodge(width = 0.6)) +
-  geom_errorbar(aes(x = month,
-                    ymin = mean - se,
-                    ymax = mean + se),
-                width = .2,
-                position = position_dodge(width = 0.6)) +
-  labs(x = "month", y = "relative abundance", fill = "sample_day") +
-  scale_fill_manual(values = brewer.pal("Dark2", n = 3)) +
-  facet_wrap(~gene, scales = "free", ncol = 3) +
+  ggplot(aes(x = month, y = mean, colour = gene)) +
+  geom_point(shape = 15) +
+  geom_line() +
+  labs(x = "Month", y = "Average Gene Abundance Relative to 16S", colour = "Gene") +
+  scale_color_grafify(palette = "kelly") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(legend.position = "bottom")
 
