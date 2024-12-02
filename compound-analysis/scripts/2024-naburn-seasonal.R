@@ -5,6 +5,8 @@ library(stringi)
 library(ggforce)
 library(RColorBrewer)
 library(ggsci)
+library(grafify)
+library(rstatix)
 
 # IMPORT YOUR CD DATA
 seasonal_study <- readr::read_delim(
@@ -228,8 +230,15 @@ write.csv(
 
 day29_compounds <- duplicates_compounds[!grepl('1',
                                           duplicates_compounds$day),]
-day29_compounds <- day1_compounds[!grepl('unknown',
-                                              day1_compounds$class),]
+day29_compounds <- day29_compounds[!grepl('unknown|antifungal',
+                                              day29_compounds$class),]
+day29_compounds$name.x <- str_to_title(day29_compounds$name.x)
+day29_compounds$class <- str_to_title(day29_compounds$class)
+
+day29_compounds$class <- str_replace_all(day29_compounds$class,'Beta-Lactam','Beta-lactam')
+day29_compounds$class <- str_replace_all(day29_compounds$class,'Macrolide_lincosamide','Macrolides and Lincosamides')
+day29_compounds$class <- str_replace_all(day29_compounds$class,'Sulfonamide_trimethoprim','Sulfonamides and Trimethoprim')
+
 
 # wide view for samples and fully annotated view
 classes_means_compounds <- day29_compounds %>%
@@ -250,119 +259,370 @@ means_compounds <- day29_compounds %>%
     se = std / sqrt(n)
   )
 
-means_compounds$name.x <- str_to_title(means_compounds$name.x)
+stacked_chem <- day29_compounds
+# total
+# stacked area plot
+stacked_seasonal <- stacked_chem %>% 
+  group_by(month, class) %>%
+  summarise(n = sum(group_area)) %>%
+  mutate(percentage = n / sum(n))
+stacked_seasonal$percentage <- stacked_seasonal$percentage * 100
+
+# time
+ggplot(stacked_seasonal, aes(x = month,
+                             y = percentage,
+                             fill = class)) +
+  geom_area(alpha=0.6 , linewidth=0.5, colour="black") +
+  scale_fill_manual(values = brewer.pal("Spectral", n = 11)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
+  labs(x = "Month", y = "Proportion of UHPLC Peak Intensity (%)", fill = "Antibiotic Class") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "bottom")
 
 # PLOT THE RESULTS
 
 # split based on target antibiotics for location 
-split_compounds <- split(means_compounds, 
-                         means_compounds$class)
-aminoglycoside_compounds <- split_compounds$aminoglycoside
-beta_compounds <- split_compounds$'beta-lactam'
-glycopeptide_metronidazole_compounds <- split_compounds$glycopeptide_metronidazole
-macrolide_lincosamide_compounds <- split_compounds$macrolide_lincosamide
-other_compounds <- split_compounds$other
-phenicol_compounds <- split_compounds$phenicol
-quinolone_compounds <- split_compounds$quinolone
-sulfonamide_trimethoprim_compounds <- split_compounds$sulfonamide_trimethoprim
-tetracycline_compounds <- split_compounds$tetracycline
+split_compounds <- split(means_compounds, means_compounds$class)
+aminoglycoside_compounds <- split_compounds$Aminoglycoside
+beta_compounds <- split_compounds$'Beta-lactam'
+macrolide_lincosamide_compounds <- split_compounds$'Macrolides and Lincosamides'
+other_compounds <- split_compounds$Other
+phenicol_compounds <- split_compounds$Phenicol
+quinolone_compounds <- split_compounds$Quinolone
+sulfonamide_trimethoprim_compounds <- split_compounds$'Sulfonamides and Trimethoprim'
+tetracycline_compounds <- split_compounds$Tetracycline
 
 # INDIVIDUAL --------------------------------------------------------------
 classes_means_compounds %>%
   ggplot(aes(x = month, y = mean, colour = class)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
-  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Class") +
-  scale_color_d3(palette = "category10", labels = c("Aminoglycoside",
-                                                    "Beta-lactam",
-                                                    "Glycopeptide and\nMetronidazole",
-                                                    "Macrolide and\nLincosamide",
-                                                    "Other",
-                                                    "Phenicol",
-                                                    "Quinolone",
-                                                    "Sulfonamide and\nTrimethoprim",
-                                                    "Tetracycline")) +
+  labs(x = "Month", y = "Average Compound Intensity (UHPLC)", color = "Antibiotic Class") +
+  scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 aminoglycoside_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 beta_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 macrolide_lincosamide_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 other_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 phenicol_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 quinolone_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
+sulfonamide_trimethoprim_compounds <- sulfonamide_trimethoprim_compounds[!grepl('5 4 Tert Butylphenyl Sulfanyl Quinazoline 2 4 Diamine|N 6 Aminohexyl 5 Chlor 1 Naphthalensulfonamid', sulfonamide_trimethoprim_compounds$name.x),]
 sulfonamide_trimethoprim_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 tetracycline_compounds %>%
   ggplot(aes(x = month, y = mean, colour = name.x)) +
   geom_point(shape = 15) +
+  geom_errorbar(aes(x = month,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .6) +
   geom_line() +
   scale_color_grafify(palette = "kelly") +
   labs(x = "Month", y = "Average Compound Intensity (UHPLC)", colour = "Antibiotic Compound Name") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
+# statistics
+
+# replace days as factor for significance tests
+chem_time_factor <- day29_compounds
+chem_time_factor$month <- as.factor(chem_time_factor$month)
+chem_time_factor$name.x <- as.factor(chem_time_factor$name.x)
+chem_time_factor$class <- as.factor(chem_time_factor$class)
+
+chem_split_time_factor <- split(chem_time_factor, chem_time_factor$class)
+chem_time_factor_amino <- chem_split_time_factor$Aminoglycoside
+chem_time_factor_beta <- chem_split_time_factor$'Beta-lactam'
+chem_time_factor_mac <- chem_split_time_factor$'Macrolides and Lincosamides'
+chem_time_factor_other <- chem_split_time_factor$Other
+chem_time_factor_phen <- chem_split_time_factor$Phenicol
+chem_time_factor_quin <- chem_split_time_factor$Quinolone
+chem_time_factor_sulf <- chem_split_time_factor$'Sulfonamides and Trimethoprim'
+chem_time_factor_tet <- chem_split_time_factor$Tetracycline
+
+
+chem_time_factor_sulf <- chem_time_factor_sulf[!grepl('5 4 Tert Butylphenyl Sulfanyl Quinazoline 2 4 Diamine|N 6 Aminohexyl 5 Chlor 1 Naphthalensulfonamid', chem_time_factor_sulf$name.x),]
+
+# time study
+library(FSA)
+# all classes
+# one way anova
+one_way_all_chem <- aov(group_area ~ class, data = chem_time_factor)
+summary(one_way_all_chem)
+# two way anova
+two_way_all_chem <- aov(group_area ~ month * class, data = chem_time_factor)
+summary(two_way_all_chem)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(one_way_all_chem)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor, group_area ~ class)
+kruskal.test(data = chem_time_factor, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ class,
+         data = chem_time_factor,
+         method = "bh")
+dunnTest(group_area ~ month,
+         data = chem_time_factor,
+         method = "bh")
+
+ggplot(chem_time_factor, aes(x = class, y = group_area) ) +
+  geom_boxplot() +
+  scale_x_discrete(name = "Antibiotic Class") +
+  scale_y_continuous(name = "UHPLC Peak Intensity") +
+  theme_classic()
+
+# beta lactam
+# one way anova
+chem_one_way_beta <- aov(group_area ~ name.x, data = chem_time_factor_beta)
+summary(chem_one_way_beta)
+chem_one_way_beta_month <- aov(group_area ~ month, data = chem_time_factor_beta)
+summary(chem_one_way_beta_month)
+# two way anova
+chem_two_way_beta <- aov(group_area ~ month * name.x, data = chem_time_factor_beta)
+summary(chem_two_way_beta)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_beta)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_beta, group_area ~ name.x)
+kruskal.test(data = chem_time_factor_beta, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_beta,
+         method = "bh")
+dunnTest(group_area ~ name.x,
+         data = chem_time_factor_beta,
+         method = "bh")
+
+# phenciol
+# one way anova
+chem_one_way_phen_month <- aov(group_area ~ month, data = chem_time_factor_phen)
+summary(chem_one_way_phen_month)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_phen_month)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_phen, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_phen,
+         method = "bh")
+
+# macrolide
+# one way anova
+chem_one_way_mac <- aov(group_area ~ name.x, data = chem_time_factor_mac)
+summary(chem_one_way_mac)
+chem_one_way_mac_month <- aov(group_area ~ month, data = chem_time_factor_mac)
+summary(chem_one_way_mac_month)
+# two way anova
+chem_two_way_mac <- aov(group_area ~ month * name.x, data = chem_time_factor_mac)
+summary(chem_two_way_mac)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_mac)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_mac, group_area ~ name.x)
+kruskal.test(data = chem_time_factor_mac, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_mac,
+         method = "bh")
+dunnTest(group_area ~ name.x,
+         data = chem_time_factor_mac,
+         method = "bh")
+
+# quinolone
+# one way anova
+chem_one_way_quin <- aov(group_area ~ name.x, data = chem_time_factor_quin)
+summary(chem_one_way_quin)
+chem_one_way_quin_month <- aov(group_area ~ month, data = chem_time_factor_quin)
+summary(chem_one_way_quin_month)
+# two way anova
+chem_two_way_quin <- aov(group_area ~ month * name.x, data = chem_time_factor_quin)
+summary(chem_two_way_quin)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_quin)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_quin, group_area ~ name.x)
+kruskal.test(data = chem_time_factor_quin, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_quin,
+         method = "bh")
+dunnTest(group_area ~ name.x,
+         data = chem_time_factor_quin,
+         method = "bh")
+
+
+# sulfonamide
+# one way anova
+chem_one_way_sulf <- aov(group_area ~ name.x, data = chem_time_factor_sulf)
+summary(chem_one_way_sulf)
+chem_one_way_sulf_month <- aov(group_area ~ month, data = chem_time_factor_sulf)
+summary(chem_one_way_sulf_month)
+# two way anova
+chem_two_way_sulf <- aov(group_area ~ month * name.x, data = chem_time_factor_sulf)
+summary(chem_two_way_sulf)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_sulf)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_sulf, group_area ~ name.x)
+kruskal.test(data = chem_time_factor_sulf, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_sulf,
+         method = "bh")
+dunnTest(group_area ~ name.x,
+         data = chem_time_factor_sulf,
+         method = "bh")
+ggplot(chem_time_factor_sulf, aes(x = name.x, y = group_area) ) +
+  geom_boxplot() +
+  scale_x_discrete(name = "Antibiotic Name") +
+  scale_y_continuous(name = "UHPLC Peak Intensity") +
+  theme_classic()
+
+# tetracycline
+# one way anova
+chem_one_way_tet_month <- aov(group_area ~ month, data = chem_time_factor_tet)
+summary(chem_one_way_tet_month)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_tet_month)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_tet, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_tet,
+         method = "bh")
+
+# other
+# one way anova
+chem_one_way_other <- aov(group_area ~ name.x, data = chem_time_factor_other)
+summary(chem_one_way_other)
+chem_one_way_other_month <- aov(group_area ~ month, data = chem_time_factor_other)
+summary(chem_one_way_other_month)
+# two way anova
+chem_two_way_other <- aov(group_area ~ month * name.x, data = chem_time_factor_other)
+summary(chem_two_way_other)
+# check normal distribution
+par(mfrow=c(2,2))
+plot(chem_one_way_other)
+par(mfrow=c(1,1))
+# kruskal wallis 
+kruskal.test(data = chem_time_factor_other, group_area ~ name.x)
+kruskal.test(data = chem_time_factor_other, group_area ~ month)
+# post-hoc test
+dunnTest(group_area ~ month,
+         data = chem_time_factor_other,
+         method = "bh")
+dunnTest(group_area ~ name.x,
+         data = chem_time_factor_other,
+         method = "bh")

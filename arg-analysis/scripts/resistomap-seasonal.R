@@ -297,6 +297,19 @@ write.csv(assay_samples, "arg-analysis/data/processed-data/annotated_delta_ct_me
 day1_genes <- assay_samples[!grepl('29', assay_samples$day),]
 day29_genes <- assay_samples[!grepl('1', assay_samples$day),]
 
+# STATISTICS -------------------------------------------------------------
+day29_genes <- assay_samples[!grepl('1', assay_samples$day),]
+
+day29_genes$class <- str_to_title(day29_genes$class)
+day29_genes$mechanism <- str_to_title(day29_genes$mechanism)
+day29_genes$class <- str_replace_all(day29_genes$class,'Beta-Lactam','Beta-lactam')
+day29_genes$class <- str_replace_all(day29_genes$class,'Glycopeptide_metronidazole','Glycopeptides and Metronidazole')
+day29_genes$class <- str_replace_all(day29_genes$class,'Macrolide_lincosamide','MLSB')
+day29_genes$class <- str_replace_all(day29_genes$class,'Mdr','Multi-Drug Resistance')
+day29_genes$class <- str_replace_all(day29_genes$class,'Mge_integrons','MGEs and Integrons')
+day29_genes$class <- str_replace_all(day29_genes$class,'Sulfonamide_trimethoprim','Sulfonamides and Trimethoprim')
+# stats test for time
+# basic stats
 # calculate means
 means <- day29_genes %>%
   group_by(pick(gene, class, month)) %>%
@@ -310,6 +323,14 @@ means <- day29_genes %>%
 # calculate means by class
 means_class_genes <- day29_genes %>%
   group_by(pick(class, month)) %>%
+  summarise(
+    mean = mean(delta_ct),
+    std = sd(delta_ct),
+    n = length(delta_ct),
+    se = std / sqrt(n)
+  )
+means_mechanism <- day29_genes %>%
+  group_by(pick(mechanism, month)) %>%
   summarise(
     mean = mean(delta_ct),
     std = sd(delta_ct),
@@ -330,12 +351,6 @@ assay_samples %>%
        fill = "antibiotic class") +
   guides(color = "none") +
   theme_minimal()
-
-# STATISTICS -------------------------------------------------------------
-day29_genes <- assay_samples[!grepl('1', assay_samples$day),]
-
-# stats test for time
-# basic stats
 
 means_day29 <- day29_genes %>%
   group_by(pick(gene, month, class)) %>%

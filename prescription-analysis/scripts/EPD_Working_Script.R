@@ -150,7 +150,7 @@ total_prescriptions %>%
                                                     "Sulfonamide and\nTrimethoprim",
                                                     "Tetracycline")) +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Aminoglycosides
@@ -161,7 +161,7 @@ aminoglycoside_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Beta-lactams
@@ -172,7 +172,7 @@ beta_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Glycopeptide and Metronidazole
@@ -183,7 +183,7 @@ glycopeptide_metronidazole_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Macrolide and Lincosamide
@@ -194,7 +194,7 @@ macrolide_lincosamide_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Other
@@ -205,7 +205,7 @@ other_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Phenicol
@@ -216,7 +216,7 @@ phenicol_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Quinolone
@@ -227,7 +227,7 @@ quinolone_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Sulfonamide and Trimethoprim
@@ -238,7 +238,7 @@ sulfonamide_trimethoprim_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
 
 # Tetracycline
@@ -249,5 +249,5 @@ tetracycline_prescriptions %>%
   labs(x = "Month", y = "Total Quantity of Medication Prescribed (units)", colour = "Antibiotic Compound Name") +
   scale_color_grafify(palette = "kelly") +
   scale_x_date(date_breaks = "1 month", date_labels = "%y-%b") +
-  theme_minimal(base_size = 12) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom")
